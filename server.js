@@ -5,47 +5,63 @@ const fs = require("fs");
 
 const app = express();
 
-// सुनिश्चित uploads folder exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-// Multer setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, file.originalname),
-});
-
-const upload = multer({ storage });
-
-// Serve static files
-app.use(express.static(__dirname));
-
-// Home route (fixes "Cannot GET /")
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// Simple ID extraction (you can expand later)
+const upload = multer({ dest: "uploads/" });
+function extractGettyId(filename) {
+  const match = filename.match(/gettyimages[-_](\d+)/i);
+  return match ? match[1] : null;
+}
 function extractId(filename) {
+  // Try Getty first
+  let id = extractGettyId(filename);
+  if (id) return id;
+
+  // Fallback: general number extraction
   const match = filename.match(/\d{6,12}/);
   return match ? match[0] : null;
 }
 
-// Build link
-function buildLink(id) {
-  if (!id) return "No ID found";
-  return `https://www.gettyimages.com/photos/${id}`;
+function detectPlatform(filename) {
+  filename = filename.toLowerCase();
+
+  if (filename.includes("shutterstock")) return "shutterstock";
+  if (filename.includes("adobe")) return "adobe";
+  if (filename.includes("getty")) return "getty";
+
+  return "unknown";
 }
 
-// Upload route (MULTIPLE FILES)
-app.post("/upload", upload.array("images"), (req, res) => {
-  const results = req.files.map(file => {
-    const id = extractId(file.originalname);
-    const link = buildLink(id);
-    return link;
-  });
+function generateLink(platform, id) {
+  switch (platform) {
+    case "shutterstock":
+      return `https://www.shutterstock.com/image-photo/${id}`;
+    case "adobe":
+      return `https://stock.adobe.com/search?k=${id}`;
+    case "getty":
+      return `https://www.gettyimages.com/photos/${id}`;
+    default:
+      return "Could not generate link";
+  }
+}
 
-  res.json(results);
+app.post("/upload", upload.single("image"), (req, res) => {
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const filename = file.originalname;
+
+  const id = extractId(filename);
+  const platform = detectPlatform(filename);
+  const link = generateLink(platform, id);
+
+  res.json({
+    filename,
+    extractedId: id,
+    platform,
+    link,
+  });
 });
 
 // Dynamic port (REQUIRED for Render)
