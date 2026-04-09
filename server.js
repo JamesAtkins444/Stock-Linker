@@ -69,12 +69,6 @@ const PORT = process.env.PORT || 3000;
 // Serve static files (CSS, JS, HTML)
 const path = require("path");
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-
-
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
