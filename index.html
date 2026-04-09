@@ -85,15 +85,6 @@
       color: #4f46e5;
     }
 
-    .copy-btn {
-      margin-top: 8px;
-      background: #10b981;
-    }
-
-    .copy-btn:hover {
-      background: #059669;
-    }
-
     .status {
       font-size: 14px;
       color: #666;
@@ -201,7 +192,8 @@
             <div class="meta">Platform: ${item.platform} | ID: ${item.id}</div>
             <div class="link">
               <a href="${item.link}" target="_blank">${item.link}</a>
-   
+            </div>
+          `;
 
           resultsDiv.appendChild(div);
         });
@@ -210,10 +202,6 @@
         resultsDiv.innerHTML = "<p class='status'>Error uploading files</p>";
         console.error(err);
       }
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text);
     }
   </script>
 
