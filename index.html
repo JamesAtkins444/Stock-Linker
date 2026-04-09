@@ -29,17 +29,18 @@
   <h3>Results:</h3>
   <div id="results"></div>
 
-  <script>
-    let files = [];
+ data.forEach((item) => {
+  const div = document.createElement("div");
+  div.style.marginBottom = "15px";
 
-    function openFilePicker() {
-      document.getElementById("filePicker").click();
-    }
+  div.innerHTML =
+    "<b>" + item.file + "</b><br>" +
+    "Platform: " + item.platform + "<br>" +
+    "ID: " + item.id + "<br>" +
+    "<a href='" + item.link + "' target='_blank'>" + item.link + "</a>";
 
-    document.getElementById("filePicker").addEventListener("change", (e) => {
-      files = [...files, ...e.target.files];
-      updateUI();
-    });
+  document.getElementById("results").appendChild(div);
+});
 
     const dropZone = document.getElementById("dropZone");
 
