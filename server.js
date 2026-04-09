@@ -25,58 +25,27 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// Simple ID extraction (you can expand later)
 function extractId(filename) {
-  // Try Getty first
-  let id = extractGettyId(filename);
-  if (id) return id;
-
-  // Fallback: general number extraction
   const match = filename.match(/\d{6,12}/);
   return match ? match[0] : null;
 }
 
-function detectPlatform(filename) {
-  filename = filename.toLowerCase();
-
-  if (filename.includes("shutterstock")) return "shutterstock";
-  if (filename.includes("adobe")) return "adobe";
-  if (filename.includes("getty")) return "getty";
-
-  return "unknown";
+// Build link
+function buildLink(id) {
+  if (!id) return "No ID found";
+  return `https://www.gettyimages.com/photos/${id}`;
 }
 
-function generateLink(platform, id) {
-  switch (platform) {
-    case "shutterstock":
-      return `https://www.shutterstock.com/image-photo/${id}`;
-    case "adobe":
-      return `https://stock.adobe.com/search?k=${id}`;
-    case "getty":
-      return `https://www.gettyimages.com/photos/${id}`;
-    default:
-      return "Could not generate link";
-  }
-}
-
-app.post("/upload", upload.single("image"), (req, res) => {
-  const file = req.file;
-
-  if (!file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  const filename = file.originalname;
-
-  const id = extractId(filename);
-  const platform = detectPlatform(filename);
-  const link = generateLink(platform, id);
-
-  res.json({
-    filename,
-    extractedId: id,
-    platform,
-    link,
+// Upload route (MULTIPLE FILES)
+app.post("/upload", upload.array("images"), (req, res) => {
+  const results = req.files.map(file => {
+    const id = extractId(file.originalname);
+    const link = buildLink(id);
+    return link;
   });
+
+  res.json(results);
 });
 
 // Dynamic port (REQUIRED for Render)
