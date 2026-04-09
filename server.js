@@ -69,8 +69,9 @@ const PORT = process.env.PORT || 3000;
 // Serve static files (CSS, JS, HTML)
 const path = require("path");
 
-// If you put index.html in root:
-app.use(express.static(path.join(__dirname)));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 
 
