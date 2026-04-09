@@ -72,13 +72,7 @@ const path = require("path");
 // If you put index.html in root:
 app.use(express.static(path.join(__dirname)));
 
-// OR if you have a 'public' folder:
-// app.use(express.static(path.join(__dirname, 'public')));
 
-// Route for root URL
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
