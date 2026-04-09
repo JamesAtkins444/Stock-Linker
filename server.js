@@ -66,11 +66,18 @@ app.post("/upload", upload.single("image"), (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Serve static files (CSS, JS, HTML)
 const path = require("path");
+
+// If you put index.html in root:
+app.use(express.static(path.join(__dirname)));
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
+});
+
+app.use(express.static(path.join(__dirname, "public")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 
