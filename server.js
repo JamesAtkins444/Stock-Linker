@@ -5,11 +5,26 @@ const fs = require("fs");
 
 const app = express();
 
-const upload = multer({ dest: "uploads/" });
-function extractGettyId(filename) {
-  const match = filename.match(/gettyimages[-_](\d+)/i);
-  return match ? match[1] : null;
-}
+// सुनिश्चित uploads folder exists
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+// Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, file.originalname),
+});
+
+const upload = multer({ storage });
+
+// Serve static files
+app.use(express.static(__dirname));
+
+// Home route (fixes "Cannot GET /")
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 function extractId(filename) {
   // Try Getty first
   let id = extractGettyId(filename);
