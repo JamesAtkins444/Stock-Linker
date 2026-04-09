@@ -3,15 +3,20 @@
 <head>
   <title>Stock Link Generator</title>
 </head>
+
 <body style="font-family: Arial; padding: 20px;">
 
-  <h2>Drag & Drop Stock Images</h2>
+  <h2>Stock Link Generator</h2>
 
+  <!-- Hidden file input -->
   <input type="file" id="filePicker" multiple style="display:none;" />
+
+  <!-- Buttons -->
   <button onclick="openFilePicker()">Choose Images</button>
 
   <br><br>
 
+  <!-- Drag & Drop Zone -->
   <div id="dropZone" style="
     width: 100%;
     height: 150px;
@@ -21,7 +26,6 @@
     justify-content: center;
     margin-bottom: 20px;
   ">
-    
     Drop images here
   </div>
 
@@ -30,32 +34,36 @@
   <h3>Results:</h3>
   <div id="results"></div>
 
- data.forEach((item) => {
-  const div = document.createElement("div");
-  div.style.marginBottom = "15px";
+  <script>
+    let files = [];
 
-  div.innerHTML =
-    "<b>" + item.file + "</b><br>" +
-    "Platform: " + item.platform + "<br>" +
-    "ID: " + item.id + "<br>" +
-    "<a href='" + item.link + "' target='_blank'>" + item.link + "</a>";
+    function openFilePicker() {
+      document.getElementById("filePicker").click();
+    }
 
-  document.getElementById("results").appendChild(div);
-});
+    // File picker selection
+    document.getElementById("filePicker").addEventListener("change", (e) => {
+      files = [...files, ...e.target.files];
+      updateUI();
+    });
 
     const dropZone = document.getElementById("dropZone");
 
+    // Click dropzone to open picker
     dropZone.addEventListener("click", openFilePicker);
 
+    // Drag over
     dropZone.addEventListener("dragover", (e) => {
       e.preventDefault();
       dropZone.style.background = "#eee";
     });
 
+    // Drag leave
     dropZone.addEventListener("dragleave", () => {
       dropZone.style.background = "";
     });
 
+    // Drop files
     dropZone.addEventListener("drop", (e) => {
       e.preventDefault();
       dropZone.style.background = "";
@@ -64,10 +72,12 @@
       updateUI();
     });
 
+    // Update UI text
     function updateUI() {
       dropZone.innerText = files.length + " file(s) ready";
     }
 
+    // Upload function
     async function uploadAll() {
       const resultsDiv = document.getElementById("results");
       resultsDiv.innerHTML = "Processing...";
@@ -75,7 +85,7 @@
       const formData = new FormData();
 
       for (let file of files) {
-        formData.append("images", file); // IMPORTANT: matches server
+        formData.append("images", file); // MUST match server
       }
 
       try {
@@ -88,21 +98,30 @@
 
         resultsDiv.innerHTML = "";
 
-        data.forEach((link, index) => {
-          const item = document.createElement("div");
-          item.style.marginBottom = "15px";
+        data.forEach((item) => {
+          const div = document.createElement("div");
+          div.style.marginBottom = "15px";
 
-          item.innerHTML =
-            "<b>" + files[index].name + "</b><br>" +
-            "<a href='" + link + "' target='_blank'>" + link + "</a>";
+          div.innerHTML =
+            "<b>" + item.file + "</b><br>" +
+            "Platform: " + item.platform + "<br>" +
+            "ID: " + item.id + "<br>" +
+            "<a href='" + item.link + "' target='_blank'>" + item.link + "</a><br>" +
+            "<button onclick=\"copyToClipboard('" + item.link + "')\">Copy Link</button>";
 
-          resultsDiv.appendChild(item);
+          resultsDiv.appendChild(div);
         });
 
       } catch (err) {
         resultsDiv.innerHTML = "Error uploading files";
         console.error(err);
       }
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      alert("Link copied!");
     }
   </script>
 
