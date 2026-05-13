@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Stock Lister</title>
+  <title>Stock Link Generator</title>
 
   <style>
     body {
@@ -96,76 +96,125 @@
 
   <div class="container">
 
-    <h1>Stock Lister</h1>
-    <p class="status">Upload images to generate share links.</p>
+    <h1>Stock Link Generator</h1>
 
-    <input type="file" id="filePicker" multiple style="display:none;" />
+    <p class="status">
+      Upload stock images, videos, or audio files to generate links instantly
+    </p>
 
-    <button onclick="openFilePicker()">Choose Images</button>
+    <!-- Hidden file input -->
+    <input
+      type="file"
+      id="filePicker"
+      multiple
+      style="display:none;"
+    />
+
+    <!-- Buttons -->
+    <button onclick="openFilePicker()">Choose Files</button>
     <button onclick="clearFiles()">Clear</button>
 
-    <div id="dropZone">Drag & drop images here</div>
+    <!-- Drag and Drop -->
+    <div id="dropZone">
+      Drag & drop stock files here
+    </div>
 
+    <!-- Upload -->
     <button onclick="uploadAll()">Get Share Links</button>
 
+    <!-- Results -->
     <div class="results" id="results"></div>
 
   </div>
 
   <script>
+
     let files = [];
 
+    // ---------------------------
+    // Open file picker
+    // ---------------------------
     function openFilePicker() {
       document.getElementById("filePicker").click();
     }
 
+    // ---------------------------
+    // Clear files
+    // ---------------------------
     function clearFiles() {
       files = [];
       updateUI();
+
       document.getElementById("results").innerHTML = "";
     }
 
+    // ---------------------------
+    // File picker
+    // ---------------------------
     document.getElementById("filePicker").addEventListener("change", (e) => {
+
       files = [...files, ...e.target.files];
+
       updateUI();
     });
 
+    // ---------------------------
+    // Drop zone
+    // ---------------------------
     const dropZone = document.getElementById("dropZone");
 
     dropZone.addEventListener("click", openFilePicker);
 
     dropZone.addEventListener("dragover", (e) => {
+
       e.preventDefault();
+
       dropZone.classList.add("active");
     });
 
     dropZone.addEventListener("dragleave", () => {
+
       dropZone.classList.remove("active");
     });
 
     dropZone.addEventListener("drop", (e) => {
+
       e.preventDefault();
+
       dropZone.classList.remove("active");
 
       files = [...files, ...e.dataTransfer.files];
+
       updateUI();
     });
 
+    // ---------------------------
+    // Update UI
+    // ---------------------------
     function updateUI() {
+
       dropZone.innerText = files.length
         ? files.length + " file(s) ready"
-        : "Drag & drop images here";
+        : "Drag & drop stock files here";
     }
 
+    // ---------------------------
+    // Upload all
+    // ---------------------------
     async function uploadAll() {
+
       const resultsDiv = document.getElementById("results");
 
       if (!files.length) {
-        resultsDiv.innerHTML = "<p class='status'>No files selected</p>";
+
+        resultsDiv.innerHTML =
+          "<p class='status'>No files selected</p>";
+
         return;
       }
 
-      resultsDiv.innerHTML = "<p class='status'>Processing...</p>";
+      resultsDiv.innerHTML =
+        "<p class='status'>Processing...</p>";
 
       const formData = new FormData();
 
@@ -174,6 +223,7 @@
       }
 
       try {
+
         const res = await fetch("/upload", {
           method: "POST",
           body: formData
@@ -184,14 +234,26 @@
         resultsDiv.innerHTML = "";
 
         data.forEach((item) => {
+
           const div = document.createElement("div");
+
           div.className = "card";
 
           div.innerHTML = `
             <b>${item.file}</b>
-            <div class="meta">Platform: ${item.platform} | ID: ${item.id}</div>
+
+            <div class="meta">
+              Platform: ${item.platform}
+              |
+              Type: ${item.assetType}
+              |
+              ID: ${item.id}
+            </div>
+
             <div class="link">
-              <a href="${item.link}" target="_blank">${item.link}</a>
+              <a href="${item.link}" target="_blank">
+                ${item.link}
+              </a>
             </div>
           `;
 
@@ -199,10 +261,14 @@
         });
 
       } catch (err) {
-        resultsDiv.innerHTML = "<p class='status'>Error uploading files</p>";
+
+        resultsDiv.innerHTML =
+          "<p class='status'>Error uploading files</p>";
+
         console.error(err);
       }
     }
+
   </script>
 
 </body>
